@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Handy Man</string>
     <string name="FACEBOOK_APP_ID">1531467110317645</string>
-    <string name="ACCOUNT_KIT_CLIENT_TOKEN">[ACCOUNT_KIT_CLIENT_TOKEN]</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">688478567cb2989236422871aa48eb1d</string>
     <string name="sign_in">SIGN IN</string>
 </resources>

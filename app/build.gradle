@@ -17,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
 }
 
 dependencies {
@@ -32,4 +36,11 @@ dependencies {
 
     //FaceBook
     implementation 'com.facebook.android:account-kit-sdk:5.+'
+
+    //Butter Knife
+    implementation 'com.jakewharton:butterknife:10.1.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+
+    //Dexter
+    implementation 'com.karumi:dexter:5.0.0'
 }
