@@ -3,21 +3,37 @@ package com.holma.myserviceapp;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.facebook.accountkit.Account;
+import com.facebook.accountkit.AccountKit;
+import com.facebook.accountkit.AccountKitCallback;
+import com.facebook.accountkit.AccountKitError;
 import com.facebook.accountkit.AccountKitLoginResult;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
+import com.holma.myserviceapp.Common.Common;
+import com.holma.myserviceapp.Retrofit.IMyServiceAPI;
+import com.holma.myserviceapp.Retrofit.RetrofitClient;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import dmax.dialog.SpotsDialog;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
+
+    IMyServiceAPI myServiceAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    AlertDialog dialog;
 
     private static final int APP_REQUEST_CODE = 1234;
     @BindView(R.id.btn_sign_in)
@@ -51,8 +67,45 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
             }
 
-            else
-                Toast.makeText(this, "Successful Login", Toast.LENGTH_SHORT).show();
+            else {
+                dialog.show();
+
+                AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+                    @Override
+                    public void onSuccess(Account account) {
+                        compositeDisposable.add(myServiceAPI.getUser(Common.API_KEY, account.getId())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(userModel -> {
+
+                                            if (userModel.isSuccess()){ // If user is available in database
+                                                Common.currentUser = userModel.getResult().get(0);
+                                                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+
+                                            else { // If user is not in the database, start MainActivity for register
+                                                Intent intent = new Intent(MainActivity.this, UpdateInfoActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+
+                                            dialog.dismiss();
+
+                                        },
+                                        throwable -> {
+                                            dialog.dismiss();
+                                            Toast.makeText(MainActivity.this, "[GET USER] "+throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }));
+                    }
+
+                    @Override
+                    public void onError(AccountKitError accountKitError) {
+                        Toast.makeText(MainActivity.this, "[ACCOUNT KIT ERROR]"+accountKitError.getErrorType().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 
@@ -62,5 +115,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+        init();
+    }
+
+    private void init() {
+        dialog = new SpotsDialog.Builder().setContext(this).setCancelable(false).build();
+        myServiceAPI = RetrofitClient.getInstance(Common.BASE_URL).create(IMyServiceAPI.class);
+    }
+
+    @Override
+    protected void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
     }
 }

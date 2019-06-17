@@ -3,6 +3,7 @@ package com.holma.myserviceapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -17,6 +18,9 @@ import com.facebook.accountkit.Account;
 import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitCallback;
 import com.facebook.accountkit.AccountKitError;
+import com.holma.myserviceapp.Common.Common;
+import com.holma.myserviceapp.Retrofit.IMyServiceAPI;
+import com.holma.myserviceapp.Retrofit.RetrofitClient;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -27,11 +31,23 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import dmax.dialog.SpotsDialog;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class SplashScreen extends AppCompatActivity {
+
+    IMyServiceAPI myServiceAPI;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        init();
 
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -41,7 +57,34 @@ public class SplashScreen extends AppCompatActivity {
                         AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
                             @Override
                             public void onSuccess(Account account) {
-                                Toast.makeText(SplashScreen.this, "Already logged in", Toast.LENGTH_SHORT).show();
+
+                                dialog.show();
+
+                                compositeDisposable.add(myServiceAPI.getUser(Common.API_KEY, account.getId())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(userModel -> {
+
+                                    if (userModel.isSuccess()){ // If user is available in database
+                                        Common.currentUser = userModel.getResult().get(0);
+                                        Intent intent = new Intent(SplashScreen.this, HomeActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+
+                                    else { // If user is not in the database, start MainActivity for register
+                                        Intent intent = new Intent(SplashScreen.this, UpdateInfoActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+
+                                    dialog.dismiss();
+
+                                },
+                                        throwable -> {
+                                            dialog.dismiss();
+                                            Toast.makeText(SplashScreen.this, "[GET USER API] "+throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }));
                             }
 
                             @Override
@@ -65,5 +108,17 @@ public class SplashScreen extends AppCompatActivity {
                     }
                 }).check();
     }
+
+    private void init() {
+        dialog = new SpotsDialog.Builder().setContext(this).setCancelable(false).build();
+        myServiceAPI = RetrofitClient.getInstance(Common.BASE_URL).create(IMyServiceAPI.class);
+    }
+
+    @Override
+    protected void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
+
 
 }
