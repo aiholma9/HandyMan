@@ -5,4 +5,5 @@
     <color name="colorAccent">#005400</color>
     <color name="button_color">#1d9e3b</color>
     <color name="divider">#F7F5F4</color>
+    <color name="colorPrice">#616161</color>
 </resources>

@@ -1,20 +1,25 @@
 package com.holma.myserviceapp.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.holma.myserviceapp.Common.Common;
 import com.holma.myserviceapp.Interface.IOnRecyclerViewClickListener;
+import com.holma.myserviceapp.MenuActivity;
+import com.holma.myserviceapp.EventBus.MenuItemEvent;
 import com.holma.myserviceapp.Model.Service;
 import com.holma.myserviceapp.R;
 import com.squareup.picasso.Picasso;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -47,8 +52,12 @@ public class MyServiceAdapter extends RecyclerView.Adapter<MyServiceAdapter.MyVi
         holder.txt_service_address.setText(new StringBuilder(serviceList.get(position).getName()));
 
         holder.setListener((view, position1) -> {
-            //Implement later
-            Toast.makeText(context, ""+serviceList.get(position).getName(), Toast.LENGTH_SHORT).show();
+            Common.currentService = serviceList.get(position);
+            //Here use postSticky, that mean this event will be listen from other activity
+            //It will different with just 'post'
+            EventBus.getDefault().postSticky(new MenuItemEvent(true, serviceList.get(position)));
+            Intent intent = new Intent(context, MenuActivity.class);
+            context.startActivity(intent);
         });
     }
 

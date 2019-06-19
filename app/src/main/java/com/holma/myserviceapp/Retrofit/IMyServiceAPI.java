@@ -2,6 +2,7 @@ package com.holma.myserviceapp.Retrofit;
 
 
 
+import com.holma.myserviceapp.Model.CategoryModel;
 import com.holma.myserviceapp.Model.ServiceModel;
 import com.holma.myserviceapp.Model.UpdateUserModel;
 import com.holma.myserviceapp.Model.User;
@@ -22,6 +23,10 @@ public interface IMyServiceAPI {
 
     @GET("service")
     Observable<ServiceModel> getService(@Query("key") String apiKey);
+
+    @GET("menu")
+    Observable<CategoryModel> getCategories(@Query("key") String apiKey,
+                                            @Query("restaurant") int serviceId);
 
     @FormUrlEncoded
     @POST("user")
