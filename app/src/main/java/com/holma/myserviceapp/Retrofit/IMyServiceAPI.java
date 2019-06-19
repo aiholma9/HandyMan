@@ -2,6 +2,7 @@ package com.holma.myserviceapp.Retrofit;
 
 
 
+import com.holma.myserviceapp.Model.ServiceModel;
 import com.holma.myserviceapp.Model.UpdateUserModel;
 import com.holma.myserviceapp.Model.User;
 import com.holma.myserviceapp.Model.UserModel;
@@ -18,6 +19,9 @@ public interface IMyServiceAPI {
     @GET("user")
     Observable<UserModel> getUser(@Query("key") String apiKey,
                                   @Query("userPhone") String userPhone);
+
+    @GET("service")
+    Observable<ServiceModel> getService(@Query("key") String apiKey);
 
     @FormUrlEncoded
     @POST("user")

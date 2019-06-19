@@ -61,4 +61,10 @@ dependencies {
     //SpotsDialog
     implementation 'com.github.d-max:spots-dialog:1.1@aar'
 
+    //Slider
+    implementation 'com.ss.bannerslider:bannerslider:2.0.0'
+
+    //Event Bus
+    implementation 'org.greenrobot:eventbus:3.1.1'
+
 }

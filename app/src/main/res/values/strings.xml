@@ -15,11 +15,10 @@
     <string name="name">Name</string>
     <string name="address">Address</string>
     <string name="update">Update</string>
+    <string name="our_service">OUR SERVICES</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
-    <string name="menu_share">Share</string>
+    <string name="nearby_service">Nearby Service</string>
+    <string name="order_history">Order History</string>
+    <string name="update_info">Update Information</string>
     <string name="sign_out">Sign out</string>
 </resources>
